@@ -1,0 +1,84 @@
+﻿using Dapper;
+using application_lourde.Models;
+
+namespace application_lourde.DAL;
+
+public class ProduitRepository : IProduitRepository
+{
+    private readonly IDbConnector _dbConnector;
+
+    public ProduitRepository(IDbConnector dbConnector)
+    {
+        _dbConnector = dbConnector;
+    }
+
+    public async Task<IEnumerable<Produit>> GetAllAsync()
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = "SELECT * FROM produits ORDER BY libelle";
+        return await connection.QueryAsync<Produit>(sql);
+    }
+
+    public async Task<Produit?> GetByIdAsync(int id)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = "SELECT * FROM produits WHERE id = @Id";
+        return await connection.QueryFirstOrDefaultAsync<Produit>(sql, new { Id = id });
+    }
+
+    public async Task<IEnumerable<Produit>> SearchAsync(string searchTerm)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = @"SELECT * FROM produits 
+                            WHERE libelle LIKE @SearchTerm 
+                            OR reference LIKE @SearchTerm 
+                            ORDER BY libelle";
+        return await connection.QueryAsync<Produit>(sql, new { SearchTerm = $"%{searchTerm}%" });
+    }
+
+    public async Task<IEnumerable<Produit>> GetStockFaibleAsync()
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = "SELECT * FROM produits WHERE stock < 5 ORDER BY stock";
+        return await connection.QueryAsync<Produit>(sql);
+    }
+
+    public async Task<int> AddAsync(Produit produit)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = @"INSERT INTO produits (libelle, reference, prix_ht, taux_tva, stock) 
+                            VALUES (@Libelle, @Reference, @PrixHT, @TauxTVA, @Stock);
+                            SELECT LAST_INSERT_ID();";
+        return await connection.ExecuteScalarAsync<int>(sql, produit);
+    }
+
+    public async Task<bool> UpdateAsync(Produit produit)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = @"UPDATE produits 
+                            SET libelle = @Libelle, 
+                                reference = @Reference, 
+                                prix_ht = @PrixHT, 
+                                taux_tva = @TauxTVA, 
+                                stock = @Stock 
+                            WHERE id = @Id";
+        var rows = await connection.ExecuteAsync(sql, produit);
+        return rows > 0;
+    }
+
+    public async Task<bool> UpdateStockAsync(int id, int nouveauStock)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = "UPDATE produits SET stock = @Stock WHERE id = @Id";
+        var rows = await connection.ExecuteAsync(sql, new { Id = id, Stock = nouveauStock });
+        return rows > 0;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = "DELETE FROM produits WHERE id = @Id";
+        var rows = await connection.ExecuteAsync(sql, new { Id = id });
+        return rows > 0;
+    }
+}

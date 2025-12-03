@@ -1,0 +1,22 @@
+﻿namespace application_lourde.Models;
+
+public class Commande
+{
+    public int Id { get; set; }
+    public int ClientId { get; set; }
+    public string NumeroCommande { get; set; } = string.Empty;
+    public string Statut { get; set; } = "A_PREPARER";
+    public DateTime CreneauRetrait { get; set; }
+    public decimal TotalHT { get; set; }
+    public decimal TotalTTC { get; set; }
+    public string? NoteInterne { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+
+    // Propriétés calculées pour l'affichage
+    public string Numero => NumeroCommande;
+    public DateTime Creneau => CreneauRetrait;
+    
+    // Pour compatibilité avec l'UI existante
+    public string Client { get; set; } = string.Empty;
+}

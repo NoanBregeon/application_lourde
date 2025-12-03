@@ -1,0 +1,68 @@
+# Correction rapide App.xaml
+Write-Host "Correction de App.xaml..." -ForegroundColor Yellow
+
+$appXamlContent = @'
+<Application x:Class="application_lourde.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Button">
+                <Setter Property="Padding" Value="15,8"/>
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="Background" Value="#0078D4"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#106EBE"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="DangerButton" TargetType="Button">
+                <Setter Property="Padding" Value="15,8"/>
+                <Setter Property="Margin" Value="5"/>
+                <Setter Property="Background" Value="#D13438"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#A01E22"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style TargetType="DataGrid">
+                <Setter Property="AutoGenerateColumns" Value="False"/>
+                <Setter Property="IsReadOnly" Value="True"/>
+                <Setter Property="SelectionMode" Value="Single"/>
+                <Setter Property="AlternatingRowBackground" Value="#F9F9F9"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="RowHeight" Value="35"/>
+            </Style>
+            <Style TargetType="DataGridColumnHeader">
+                <Setter Property="Background" Value="#F3F3F3"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="10,8"/>
+            </Style>
+            <Style TargetType="DataGridRow">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#E8F4FD"/>
+                    </Trigger>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="#CCE8FF"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
+'@
+
+# Ecriture du fichier
+[System.IO.File]::WriteAllText("$PSScriptRoot\App.xaml", $appXamlContent, [System.Text.Encoding]::UTF8)
+
+Write-Host "App.xaml corrige !" -ForegroundColor Green
+Write-Host ""
+Write-Host "Lancez maintenant: dotnet build" -ForegroundColor Cyan

@@ -1,0 +1,251 @@
+﻿using System;
+using System.IO;
+using System.Threading.Tasks;
+using MySqlConnector;
+
+namespace application_lourde.Services;
+
+public class ProduitImageService
+{
+    private readonly string _connectionString;
+
+    public ProduitImageService(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+
+    /// <summary>
+    /// Ajoute un produit avec son image convertie en Base64 dans la base de données
+    /// </summary>
+    public async Task<int> AjouterProduitAsync(
+        string libelle,
+        string description,
+        decimal prixHT,
+        decimal tva,
+        int stock,
+        string categorie,
+        string cheminImage)
+    {
+        // Validation des paramètres
+        if (string.IsNullOrWhiteSpace(libelle))
+            throw new ArgumentException("Le libellé est obligatoire", nameof(libelle));
+
+        if (prixHT < 0)
+            throw new ArgumentException("Le prix HT ne peut pas être négatif", nameof(prixHT));
+
+        if (stock < 0)
+            throw new ArgumentException("Le stock ne peut pas être négatif", nameof(stock));
+
+        // Conversion de l'image en Base64
+        string imageBase64 = ConvertirImageEnBase64(cheminImage);
+
+        // Insertion dans la base de données
+        using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        const string query = @"
+            INSERT INTO produits 
+            (libelle, description, prix_ht, tva, stock, categorie, image, created_at, updated_at)
+            VALUES 
+            (@Libelle, @Description, @PrixHT, @TVA, @Stock, @Categorie, @Image, @CreatedAt, @UpdatedAt)";
+
+        using var command = new MySqlCommand(query, connection);
+        
+        // Ajout des paramètres pour éviter les injections SQL
+        command.Parameters.AddWithValue("@Libelle", libelle);
+        command.Parameters.AddWithValue("@Description", description ?? string.Empty);
+        command.Parameters.AddWithValue("@PrixHT", prixHT);
+        command.Parameters.AddWithValue("@TVA", tva);
+        command.Parameters.AddWithValue("@Stock", stock);
+        command.Parameters.AddWithValue("@Categorie", categorie ?? string.Empty);
+        command.Parameters.AddWithValue("@Image", imageBase64);
+        command.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
+        command.Parameters.AddWithValue("@UpdatedAt", DateTime.Now);
+
+        // Exécution de la commande
+        int rowsAffected = await command.ExecuteNonQueryAsync();
+
+        // Récupération de l'ID du produit inséré
+        command.CommandText = "SELECT LAST_INSERT_ID()";
+        var result = await command.ExecuteScalarAsync();
+        
+        return Convert.ToInt32(result);
+    }
+
+    /// <summary>
+    /// Convertit une image en chaîne Base64 avec le préfixe data:image
+    /// </summary>
+    private string ConvertirImageEnBase64(string cheminImage)
+    {
+        if (string.IsNullOrWhiteSpace(cheminImage))
+            return string.Empty;
+
+        if (!File.Exists(cheminImage))
+            throw new FileNotFoundException($"Le fichier image '{cheminImage}' n'existe pas.");
+
+        try
+        {
+            // Lecture du fichier image
+            byte[] imageBytes = File.ReadAllBytes(cheminImage);
+            
+            // Conversion en Base64
+            string base64String = Convert.ToBase64String(imageBytes);
+            
+            // Détection du type MIME
+            string extension = Path.GetExtension(cheminImage).ToLower();
+            string mimeType = extension switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                ".webp" => "image/webp",
+                _ => "image/jpeg" // Par défaut
+            };
+
+            // Retour avec le préfixe data:image
+            return $"data:{mimeType};base64,{base64String}";
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Erreur lors de la conversion de l'image : {ex.Message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// Mise à jour d'un produit existant avec nouvelle image
+    /// - si cheminImage == null => ne modifie pas la colonne image
+    /// - si cheminImage == string.Empty => supprime l'image (image = NULL)
+    /// - sinon => convertit et met à jour l'image
+    /// </summary>
+    public async Task<bool> ModifierProduitAsync(
+        int id,
+        string libelle,
+        string description,
+        decimal prixHT,
+        decimal tva,
+        int stock,
+        string categorie,
+        string? cheminImage = null)
+    {
+        using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        string query;
+        MySqlCommand command;
+
+        if (cheminImage != null)
+        {
+            // cas explicite: supprimer l'image
+            if (cheminImage == string.Empty)
+            {
+                query = @"
+                    UPDATE produits 
+                    SET libelle = @Libelle, 
+                        description = @Description, 
+                        prix_ht = @PrixHT, 
+                        tva = @TVA, 
+                        stock = @Stock, 
+                        categorie = @Categorie, 
+                        image = NULL, 
+                        updated_at = @UpdatedAt
+                    WHERE id = @Id";
+
+                command = new MySqlCommand(query, connection);
+            }
+            else
+            {
+                // nouvelle image fournie
+                string imageBase64 = ConvertirImageEnBase64(cheminImage);
+                
+                query = @"
+                    UPDATE produits 
+                    SET libelle = @Libelle, 
+                        description = @Description, 
+                        prix_ht = @PrixHT, 
+                        tva = @TVA, 
+                        stock = @Stock, 
+                        categorie = @Categorie, 
+                        image = @Image, 
+                        updated_at = @UpdatedAt
+                    WHERE id = @Id";
+
+                command = new MySqlCommand(query, connection);
+                command.Parameters.AddWithValue("@Image", imageBase64);
+            }
+        }
+        else
+        {
+            // pas de changement sur l'image
+            query = @"
+                UPDATE produits 
+                SET libelle = @Libelle, 
+                    description = @Description, 
+                    prix_ht = @PrixHT, 
+                    tva = @TVA, 
+                    stock = @Stock, 
+                    categorie = @Categorie, 
+                    updated_at = @UpdatedAt
+                WHERE id = @Id";
+
+            command = new MySqlCommand(query, connection);
+        }
+
+        command.Parameters.AddWithValue("@Id", id);
+        command.Parameters.AddWithValue("@Libelle", libelle);
+        command.Parameters.AddWithValue("@Description", description ?? string.Empty);
+        command.Parameters.AddWithValue("@PrixHT", prixHT);
+        command.Parameters.AddWithValue("@TVA", tva);
+        command.Parameters.AddWithValue("@Stock", stock);
+        command.Parameters.AddWithValue("@Categorie", categorie ?? string.Empty);
+        command.Parameters.AddWithValue("@UpdatedAt", DateTime.Now);
+
+        int rowsAffected = await command.ExecuteNonQueryAsync();
+        return rowsAffected > 0;
+    }
+
+    /// <summary>
+    /// Récupère l'image Base64 d'un produit
+    /// </summary>
+    public async Task<string?> RecupererImageBase64Async(int produitId)
+    {
+        using var connection = new MySqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        const string query = "SELECT image FROM produits WHERE id = @Id";
+        using var command = new MySqlCommand(query, connection);
+        command.Parameters.AddWithValue("@Id", produitId);
+
+        var result = await command.ExecuteScalarAsync();
+        return result?.ToString();
+    }
+
+    /// <summary>
+    /// Sauvegarde l'image Base64 en fichier sur le disque
+    /// </summary>
+    public void SauvegarderImageDepuisBase64(string imageBase64, string cheminDestination)
+    {
+        if (string.IsNullOrWhiteSpace(imageBase64))
+            throw new ArgumentException("L'image Base64 est vide", nameof(imageBase64));
+
+        try
+        {
+            // Suppression du préfixe data:image/...;base64,
+            string base64Data = imageBase64;
+            if (imageBase64.Contains(","))
+            {
+                base64Data = imageBase64.Split(',')[1];
+            }
+
+            // Conversion Base64 vers bytes
+            byte[] imageBytes = Convert.FromBase64String(base64Data);
+
+            // Sauvegarde sur le disque
+            File.WriteAllBytes(cheminDestination, imageBytes);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Erreur lors de la sauvegarde de l'image : {ex.Message}", ex);
+        }
+    }
+}

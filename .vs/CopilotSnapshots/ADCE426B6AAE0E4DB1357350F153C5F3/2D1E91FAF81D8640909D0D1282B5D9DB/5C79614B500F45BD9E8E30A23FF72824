@@ -1,0 +1,13 @@
+﻿using System.Windows;
+using application_lourde.ViewModels;
+
+namespace application_lourde.Views;
+
+public partial class MainWindow : Window
+{
+    public MainWindow()
+    {
+        InitializeComponent();
+        DataContext = new MainViewModel();
+    }
+}

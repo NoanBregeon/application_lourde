@@ -1,0 +1,347 @@
+﻿using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
+using application_lourde.Models;
+using application_lourde.Services;
+
+namespace application_lourde.ViewModels;
+
+public class CommandeViewModel : ViewModelBase
+{
+    private readonly ICommandeService _commandeService;
+
+    private ObservableCollection<Commande> _commandes = new();
+    private ObservableCollection<Commande> _historique = new();
+    private ObservableCollection<CommandeLigne> _lignesCommande = new();
+    private Commande? _commandeSelectionnee;
+    private CommandeLigne? _ligneSelectionnee;
+    private bool _isLoading;
+    private bool _afficherHistorique;
+    private int _preparationId;
+
+    public ObservableCollection<Commande> Commandes
+    {
+        get => _commandes;
+        set => SetProperty(ref _commandes, value);
+    }
+
+    public ObservableCollection<Commande> Historique
+    {
+        get => _historique;
+        set => SetProperty(ref _historique, value);
+    }
+
+    public ObservableCollection<CommandeLigne> LignesCommande
+    {
+        get => _lignesCommande;
+        set => SetProperty(ref _lignesCommande, value);
+    }
+
+    public Commande? CommandeSelectionnee
+    {
+        get => _commandeSelectionnee;
+        set
+        {
+            if (SetProperty(ref _commandeSelectionnee, value))
+            {
+                if (value != null)
+                {
+                    // fire-and-forget: explicitly discard task to avoid CS4014 warning
+                    _ = ChargerLignesCommandeAsync(value.Id);
+                }
+                else
+                {
+                    LignesCommande.Clear();
+                }
+            }
+        }
+    }
+
+    public CommandeLigne? LigneSelectionnee
+    {
+        get => _ligneSelectionnee;
+        set => SetProperty(ref _ligneSelectionnee, value);
+    }
+
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set => SetProperty(ref _isLoading, value);
+    }
+
+    public bool AfficherHistorique
+    {
+        get => _afficherHistorique;
+        set
+        {
+            if (SetProperty(ref _afficherHistorique, value))
+            {
+                if (value)
+                    // fire-and-forget: explicitly discard task to avoid CS4014 warning
+                    _ = ChargerHistoriqueAsync();
+            }
+        }
+    }
+
+    public ICommand ValiderLigneCommand { get; }
+    public ICommand MarquerRuptureCommand { get; }
+    public ICommand FinaliserCommandeCommand { get; }
+
+    public CommandeViewModel(ICommandeService commandeService)
+    {
+        _commandeService = commandeService;
+
+        ValiderLigneCommand = new RelayCommand(_ => ValiderLigne(), _ => LigneSelectionnee != null && CommandeSelectionnee != null);
+        MarquerRuptureCommand = new RelayCommand(_ => MarquerRupture(), _ => LigneSelectionnee != null && CommandeSelectionnee != null);
+        FinaliserCommandeCommand = new RelayCommand(_ => FinaliserCommande(), _ => CommandeSelectionnee != null);
+    }
+
+    public async void LoadDataAsync()
+    {
+        await ChargerCommandesAsync();
+    }
+
+    private async Task ChargerCommandesAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            var commandes = await _commandeService.GetCommandesAPreparerAsync();
+            Commandes = new ObservableCollection<Commande>(commandes);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors du chargement des commandes : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task ChargerHistoriqueAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            var historique = await _commandeService.GetHistoriqueCommandesAsync();
+            Historique = new ObservableCollection<Commande>(historique);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors du chargement de l'historique : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task ChargerLignesCommandeAsync(int commandeId)
+    {
+        try
+        {
+            IsLoading = true;
+            _preparationId = await _commandeService.DemarrerPreparationAsync(commandeId);
+            var lignes = await _commandeService.GetLignesCommandeAsync(commandeId);
+            LignesCommande = new ObservableCollection<CommandeLigne>(lignes);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors du chargement des lignes de commande : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ValiderLigne()
+    {
+        if (LigneSelectionnee == null || CommandeSelectionnee == null) return;
+
+        var dialog = new QuantiteDialog(LigneSelectionnee);
+        if (dialog.ShowDialog() == true)
+        {
+            ValiderLigneAsync(LigneSelectionnee.Id, dialog.QuantitePreparee);
+        }
+    }
+
+    private async void ValiderLigneAsync(int commandeLigneId, int quantitePreparee)
+    {
+        try
+        {
+            IsLoading = true;
+            var success = await _commandeService.ValiderLigneAsync(_preparationId, commandeLigneId, quantitePreparee);
+            if (success)
+            {
+                MessageBox.Show("Ligne validée avec succès", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (CommandeSelectionnee != null)
+                    await ChargerLignesCommandeAsync(CommandeSelectionnee.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors de la validation de la ligne : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void MarquerRupture()
+    {
+        if (LigneSelectionnee == null || CommandeSelectionnee == null) return;
+
+        var result = MessageBox.Show(
+            $"Marquer le produit '{LigneSelectionnee.ProduitLibelle}' en rupture ?",
+            "Confirmation",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            MarquerRuptureAsync(LigneSelectionnee.Id);
+        }
+    }
+
+    private async void MarquerRuptureAsync(int commandeLigneId)
+    {
+        try
+        {
+            IsLoading = true;
+            var success = await _commandeService.MarquerLigneRuptureAsync(_preparationId, commandeLigneId);
+            if (success)
+            {
+                MessageBox.Show("Ligne marquée en rupture", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (CommandeSelectionnee != null)
+                    await ChargerLignesCommandeAsync(CommandeSelectionnee.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors du marquage en rupture : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void FinaliserCommande()
+    {
+        if (CommandeSelectionnee == null) return;
+
+        var result = MessageBox.Show(
+            $"Finaliser la commande N° {CommandeSelectionnee.Numero} ?\nElle sera marquée comme PRÊTE.",
+            "Confirmation",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            FinaliserCommandeAsync(CommandeSelectionnee.Id);
+        }
+    }
+
+    private async void FinaliserCommandeAsync(int commandeId)
+    {
+        try
+        {
+            IsLoading = true;
+            var success = await _commandeService.FinaliserCommandeAsync(commandeId);
+            if (success)
+            {
+                MessageBox.Show("Commande finalisée avec succès", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                await ChargerCommandesAsync();
+                CommandeSelectionnee = null;
+                LignesCommande.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors de la finalisation de la commande : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}
+
+public class QuantiteDialog : Window
+{
+    public int QuantitePreparee { get; private set; }
+
+    public QuantiteDialog(CommandeLigne ligne)
+    {
+        Title = "Quantité préparée";
+        Width = 350;
+        Height = 220;
+        WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+        var grid = new System.Windows.Controls.Grid { Margin = new Thickness(20) };
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+        var infoLabel = new System.Windows.Controls.Label 
+        { 
+            Content = $"Produit : {ligne.ProduitLibelle}\n" +
+                     $"Quantité demandée : {ligne.QuantiteDemandee}\n" +
+                     $"Stock disponible : {ligne.StockDisponible}"
+        };
+        System.Windows.Controls.Grid.SetRow(infoLabel, 0);
+
+        var quantiteLabel = new System.Windows.Controls.Label { Content = "Quantité préparée :" };
+        System.Windows.Controls.Grid.SetRow(quantiteLabel, 1);
+
+        var quantiteTextBox = new System.Windows.Controls.TextBox 
+        { 
+            Text = Math.Min(ligne.QuantiteDemandee, ligne.StockDisponible).ToString() 
+        };
+        System.Windows.Controls.Grid.SetRow(quantiteTextBox, 1);
+        quantiteTextBox.Margin = new Thickness(0, 25, 0, 0);
+
+        var buttonPanel = new System.Windows.Controls.StackPanel 
+        { 
+            Orientation = System.Windows.Controls.Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right
+        };
+        System.Windows.Controls.Grid.SetRow(buttonPanel, 3);
+
+        var okButton = new System.Windows.Controls.Button { Content = "Valider", Width = 100 };
+        okButton.Click += (s, e) =>
+        {
+            if (int.TryParse(quantiteTextBox.Text, out var quantite) && quantite >= 0 && quantite <= ligne.QuantiteDemandee)
+            {
+                QuantitePreparee = quantite;
+                DialogResult = true;
+                Close();
+            }
+            else
+            {
+                MessageBox.Show($"Veuillez entrer une quantité valide entre 0 et {ligne.QuantiteDemandee}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        };
+
+        var cancelButton = new System.Windows.Controls.Button { Content = "Annuler", Width = 100 };
+        cancelButton.Click += (s, e) =>
+        {
+            DialogResult = false;
+            Close();
+        };
+
+        buttonPanel.Children.Add(okButton);
+        buttonPanel.Children.Add(cancelButton);
+
+        grid.Children.Add(infoLabel);
+        grid.Children.Add(quantiteLabel);
+        grid.Children.Add(quantiteTextBox);
+        grid.Children.Add(buttonPanel);
+
+        Content = grid;
+    }
+}

@@ -1,0 +1,16 @@
+﻿namespace application_lourde.Models;
+
+public class LigneCommande
+{
+    public int Id { get; set; }
+    public int CommandeId { get; set; }
+    public int ProduitId { get; set; }
+    public int QuantiteDemandee { get; set; }
+    public int QuantitePreparee { get; set; }
+    public decimal PrixUnitaireHT { get; set; }
+    public bool EnRupture { get; set; }
+    
+    // Propriétés de navigation/affichage
+    public string ProduitLibelle { get; set; } = string.Empty;
+    public int StockDisponible { get; set; }
+}

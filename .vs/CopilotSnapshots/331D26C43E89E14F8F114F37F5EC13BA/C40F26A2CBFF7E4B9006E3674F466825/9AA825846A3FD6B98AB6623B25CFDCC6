@@ -1,0 +1,11 @@
+﻿using System.Windows.Controls;
+
+namespace application_lourde.Views;
+
+public partial class StockView : UserControl
+{
+    public StockView()
+    {
+        InitializeComponent();
+    }
+}

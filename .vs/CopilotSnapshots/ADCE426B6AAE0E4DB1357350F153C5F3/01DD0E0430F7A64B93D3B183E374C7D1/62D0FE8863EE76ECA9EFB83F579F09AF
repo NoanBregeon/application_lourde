@@ -1,0 +1,128 @@
+﻿using Dapper;
+using application_lourde.Models;
+
+namespace application_lourde.DAL;
+
+public class CommandeRepository : ICommandeRepository
+{
+    private readonly IDbConnector _dbConnector;
+
+    public CommandeRepository(IDbConnector dbConnector)
+    {
+        _dbConnector = dbConnector;
+    }
+
+    public async Task<IEnumerable<Commande>> GetAllAsync()
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = "SELECT * FROM commandes ORDER BY creneau";
+        return await connection.QueryAsync<Commande>(sql);
+    }
+
+    public async Task<Commande?> GetByIdAsync(int id)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = "SELECT * FROM commandes WHERE id = @Id";
+        return await connection.QueryFirstOrDefaultAsync<Commande>(sql, new { Id = id });
+    }
+
+    public async Task<IEnumerable<CommandeLigne>> GetLignesAsync(int commandeId)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = @"
+            SELECT cl.id, cl.commande_id AS CommandeId, cl.produit_id AS ProduitId, 
+                   p.libelle AS ProduitLibelle, cl.quantite_demandee AS QuantiteDemandee, 
+                   p.stock AS StockDisponible,
+                   COALESCE(pl.quantite_preparee, 0) AS QuantitePreparee,
+                   COALESCE(pl.en_rupture, 0) AS EnRupture
+            FROM commande_lignes cl
+            INNER JOIN produits p ON cl.produit_id = p.id
+            LEFT JOIN preparations prep ON prep.commande_id = cl.commande_id
+            LEFT JOIN preparation_lignes pl ON pl.commande_ligne_id = cl.id AND pl.preparation_id = prep.id
+            WHERE cl.commande_id = @CommandeId";
+        return await connection.QueryAsync<CommandeLigne>(sql, new { CommandeId = commandeId });
+    }
+
+    public async Task<IEnumerable<Commande>> GetCommandesAPreparerAsync()
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = "SELECT * FROM commandes WHERE statut IN ('EN_ATTENTE', 'EN_PREPARATION') ORDER BY creneau";
+        return await connection.QueryAsync<Commande>(sql);
+    }
+
+    public async Task<IEnumerable<Commande>> GetHistoriqueAsync()
+    {
+        using var connection = _dbConnector.CreateConnection();
+        const string sql = "SELECT * FROM commandes WHERE statut = 'PRETE' ORDER BY creneau DESC";
+        return await connection.QueryAsync<Commande>(sql);
+    }
+
+    public async Task<int> CreatePreparationAsync(int commandeId)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        
+        const string checkSql = "SELECT id FROM preparations WHERE commande_id = @CommandeId LIMIT 1";
+        var existingId = await connection.ExecuteScalarAsync<int?>(checkSql, new { CommandeId = commandeId });
+        
+        if (existingId.HasValue)
+            return existingId.Value;
+
+        const string sql = @"INSERT INTO preparations (commande_id, date_preparation, statut) 
+                            VALUES (@CommandeId, @Date, 'EN_COURS');
+                            SELECT LAST_INSERT_ID();";
+        return await connection.ExecuteScalarAsync<int>(sql, new { CommandeId = commandeId, Date = DateTime.Now });
+    }
+
+    public async Task<bool> UpdateLignePreparationAsync(int preparationId, int commandeLigneId, int quantite, bool enRupture)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        
+        const string checkSql = "SELECT COUNT(*) FROM preparation_lignes WHERE preparation_id = @PreparationId AND commande_ligne_id = @CommandeLigneId";
+        var exists = await connection.ExecuteScalarAsync<int>(checkSql, new { PreparationId = preparationId, CommandeLigneId = commandeLigneId }) > 0;
+
+        string sql;
+        if (exists)
+        {
+            sql = @"UPDATE preparation_lignes 
+                   SET quantite_preparee = @Quantite, en_rupture = @EnRupture 
+                   WHERE preparation_id = @PreparationId AND commande_ligne_id = @CommandeLigneId";
+        }
+        else
+        {
+            sql = @"INSERT INTO preparation_lignes (preparation_id, commande_ligne_id, quantite_preparee, en_rupture) 
+                   VALUES (@PreparationId, @CommandeLigneId, @Quantite, @EnRupture)";
+        }
+
+        var rows = await connection.ExecuteAsync(sql, new 
+        { 
+            PreparationId = preparationId, 
+            CommandeLigneId = commandeLigneId, 
+            Quantite = quantite, 
+            EnRupture = enRupture 
+        });
+
+        if (rows > 0 && quantite > 0 && !enRupture)
+        {
+            const string updateStockSql = @"UPDATE produits p
+                                           INNER JOIN commande_lignes cl ON cl.produit_id = p.id
+                                           SET p.stock = p.stock - @Quantite
+                                           WHERE cl.id = @CommandeLigneId";
+            await connection.ExecuteAsync(updateStockSql, new { CommandeLigneId = commandeLigneId, Quantite = quantite });
+        }
+
+        return rows > 0;
+    }
+
+    public async Task<bool> FinaliserCommandeAsync(int commandeId)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        
+        const string updateCommandeSql = "UPDATE commandes SET statut = 'PRETE' WHERE id = @CommandeId";
+        await connection.ExecuteAsync(updateCommandeSql, new { CommandeId = commandeId });
+
+        const string updatePreparationSql = "UPDATE preparations SET statut = 'TERMINEE' WHERE commande_id = @CommandeId";
+        var rows = await connection.ExecuteAsync(updatePreparationSql, new { CommandeId = commandeId });
+
+        return rows > 0;
+    }
+}

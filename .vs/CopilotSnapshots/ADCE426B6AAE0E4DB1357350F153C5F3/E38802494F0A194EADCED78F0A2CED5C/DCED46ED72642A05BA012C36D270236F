@@ -1,0 +1,129 @@
+﻿-- Base de données pour l'application de gestion Drive
+-- MariaDB / MySQL
+
+CREATE DATABASE IF NOT EXISTS drive_db;
+USE drive_db;
+
+-- Table des produits
+CREATE TABLE IF NOT EXISTS produits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    libelle VARCHAR(255) NOT NULL,
+    reference VARCHAR(100) NOT NULL UNIQUE,
+    prix_ht DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    taux_tva DECIMAL(5, 2) NOT NULL DEFAULT 20.00,
+    stock INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_libelle (libelle),
+    INDEX idx_reference (reference),
+    INDEX idx_stock (stock)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des commandes
+CREATE TABLE IF NOT EXISTS commandes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numero VARCHAR(50) NOT NULL UNIQUE,
+    client VARCHAR(255) NOT NULL,
+    creneau DATETIME NOT NULL,
+    statut ENUM('EN_ATTENTE', 'EN_PREPARATION', 'PRETE', 'ANNULEE') DEFAULT 'EN_ATTENTE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_numero (numero),
+    INDEX idx_statut (statut),
+    INDEX idx_creneau (creneau)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des lignes de commande
+CREATE TABLE IF NOT EXISTS commande_lignes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    commande_id INT NOT NULL,
+    produit_id INT NOT NULL,
+    quantite_demandee INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (commande_id) REFERENCES commandes(id) ON DELETE CASCADE,
+    FOREIGN KEY (produit_id) REFERENCES produits(id) ON DELETE RESTRICT,
+    INDEX idx_commande (commande_id),
+    INDEX idx_produit (produit_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des préparations
+CREATE TABLE IF NOT EXISTS preparations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    commande_id INT NOT NULL,
+    date_preparation DATETIME NOT NULL,
+    statut ENUM('EN_COURS', 'TERMINEE', 'ANNULEE') DEFAULT 'EN_COURS',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (commande_id) REFERENCES commandes(id) ON DELETE CASCADE,
+    INDEX idx_commande (commande_id),
+    INDEX idx_statut (statut)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table des lignes de préparation
+CREATE TABLE IF NOT EXISTS preparation_lignes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    preparation_id INT NOT NULL,
+    commande_ligne_id INT NOT NULL,
+    quantite_preparee INT NOT NULL DEFAULT 0,
+    en_rupture BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (preparation_id) REFERENCES preparations(id) ON DELETE CASCADE,
+    FOREIGN KEY (commande_ligne_id) REFERENCES commande_lignes(id) ON DELETE CASCADE,
+    INDEX idx_preparation (preparation_id),
+    INDEX idx_commande_ligne (commande_ligne_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Données de test : Produits
+INSERT INTO produits (libelle, reference, prix_ht, taux_tva, stock) VALUES
+('Pommes Golden 1kg', 'FRUIT-001', 2.50, 5.50, 45),
+('Tomates grappe 500g', 'LEGUME-001', 1.80, 5.50, 30),
+('Lait demi-écrémé 1L', 'LAIT-001', 0.95, 5.50, 3),
+('Pain de mie complet', 'PAIN-001', 1.20, 5.50, 12),
+('Yaourt nature x12', 'YAOURT-001', 2.30, 5.50, 8),
+('Poulet fermier 1.2kg', 'VIANDE-001', 8.50, 5.50, 2),
+('Pâtes spaghetti 500g', 'EPICERIE-001', 0.85, 5.50, 25),
+('Huile d\'olive 75cl', 'EPICERIE-002', 4.50, 20.00, 15),
+('Chocolat noir 200g', 'CONFIS-001', 2.80, 20.00, 1),
+('Eau minérale 6x1.5L', 'BOISSON-001', 2.10, 5.50, 40);
+
+-- Données de test : Commandes
+INSERT INTO commandes (numero, client, creneau, statut) VALUES
+('CMD-2024-001', 'Dupont Marie', '2024-01-15 10:00:00', 'EN_ATTENTE'),
+('CMD-2024-002', 'Martin Pierre', '2024-01-15 11:30:00', 'EN_ATTENTE'),
+('CMD-2024-003', 'Bernard Sophie', '2024-01-15 14:00:00', 'EN_ATTENTE'),
+('CMD-2024-004', 'Petit Jean', '2024-01-14 16:00:00', 'PRETE'),
+('CMD-2024-005', 'Durand Claire', '2024-01-14 18:00:00', 'PRETE');
+
+-- Données de test : Lignes de commande pour CMD-2024-001
+INSERT INTO commande_lignes (commande_id, produit_id, quantite_demandee) VALUES
+(1, 1, 2),  -- 2x Pommes
+(1, 3, 3),  -- 3x Lait
+(1, 5, 1),  -- 1x Yaourt
+(1, 7, 2);  -- 2x Pâtes
+
+-- Données de test : Lignes de commande pour CMD-2024-002
+INSERT INTO commande_lignes (commande_id, produit_id, quantite_demandee) VALUES
+(2, 2, 3),  -- 3x Tomates
+(2, 4, 1),  -- 1x Pain
+(2, 6, 1),  -- 1x Poulet
+(2, 8, 1),  -- 1x Huile
+(2, 10, 2); -- 2x Eau
+
+-- Données de test : Lignes de commande pour CMD-2024-003
+INSERT INTO commande_lignes (commande_id, produit_id, quantite_demandee) VALUES
+(3, 1, 1),  -- 1x Pommes
+(3, 3, 2),  -- 2x Lait
+(3, 9, 3);  -- 3x Chocolat (rupture probable)
+
+-- Données de test : Lignes de commande pour CMD-2024-004 (Historique)
+INSERT INTO commande_lignes (commande_id, produit_id, quantite_demandee) VALUES
+(4, 1, 2),
+(4, 5, 1),
+(4, 7, 3);
+
+-- Données de test : Lignes de commande pour CMD-2024-005 (Historique)
+INSERT INTO commande_lignes (commande_id, produit_id, quantite_demandee) VALUES
+(5, 2, 2),
+(5, 4, 2),
+(5, 10, 1);

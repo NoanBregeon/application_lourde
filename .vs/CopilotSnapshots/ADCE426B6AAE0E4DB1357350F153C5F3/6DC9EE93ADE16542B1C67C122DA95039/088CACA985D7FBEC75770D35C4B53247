@@ -1,0 +1,69 @@
+﻿<Window x:Class="application_lourde.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:application_lourde.ViewModels"
+        Title="Gestion Drive - Stock &amp; Commandes" 
+        Height="700" 
+        Width="1200"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Menu de navigation -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="15,10">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="GESTION DRIVE" 
+                          FontSize="20" 
+                          FontWeight="Bold" 
+                          Foreground="White" 
+                          VerticalAlignment="Center"
+                          Margin="0,0,50,0"/>
+                
+                <Button Content="📦 Gestion du Stock" 
+                       Command="{Binding NavigateToStockCommand}"
+                       Width="180"
+                       Height="40"/>
+                
+                <Button Content="🛒 Préparation Commandes" 
+                       Command="{Binding NavigateToCommandesCommand}"
+                       Width="200"
+                       Height="40"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Contenu principal -->
+        <ContentControl Grid.Row="1" Content="{Binding CurrentView}">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type vm:StockViewModel}">
+                    <ContentControl>
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <ContentControl Content="{Binding}"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:CommandeViewModel}">
+                    <ContentControl>
+                        <ContentControl.Style>
+                            <Style TargetType="ContentControl">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <ContentControl Content="{Binding}"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ContentControl.Style>
+                    </ContentControl>
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
+    </Grid>
+</Window>

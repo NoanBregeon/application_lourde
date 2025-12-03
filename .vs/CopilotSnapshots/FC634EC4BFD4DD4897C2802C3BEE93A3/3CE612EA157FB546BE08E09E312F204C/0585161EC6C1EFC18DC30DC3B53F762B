@@ -1,0 +1,55 @@
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System.IO;
+using System.Windows;
+using application_lourde.DAL;
+using application_lourde.Services;
+using application_lourde.ViewModels;
+using application_lourde.Views;
+
+namespace application_lourde;
+
+public partial class App : Application
+{
+    public IServiceProvider ServiceProvider { get; private set; } = null!;
+    public IConfiguration Configuration { get; private set; } = null!;
+
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+        Configuration = builder.Build();
+
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection);
+
+        ServiceProvider = serviceCollection.BuildServiceProvider();
+
+        var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+        mainWindow.Show();
+    }
+
+    private void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton(Configuration);
+        
+        services.AddSingleton<IDbConnector>(sp => 
+            new MariaDbConnector(Configuration.GetConnectionString("MariaDb")!));
+        
+        services.AddTransient<IProduitRepository, ProduitRepository>();
+        services.AddTransient<ICommandeRepository, CommandeRepository>();
+        
+        services.AddTransient<IStockService, StockService>();
+        services.AddTransient<ICommandeService, CommandeService>();
+        
+        services.AddTransient<MainViewModel>();
+        services.AddTransient<StockViewModel>();
+        services.AddTransient<CommandeViewModel>();
+        
+        services.AddTransient<MainWindow>();
+    }
+}

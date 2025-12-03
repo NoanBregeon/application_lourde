@@ -1,0 +1,2 @@
+C:\Users\Fury\source\repos\application_lourde\bin\Release\net8.0-windows\win-x64\publish\application_lourde.pdb
+C:\Users\Fury\source\repos\application_lourde\bin\Release\net8.0-windows\win-x64\publish\application_lourde.exe

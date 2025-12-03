@@ -1,0 +1,250 @@
+﻿using System;
+using System.Windows;
+using Microsoft.Win32;
+using application_lourde.Services;
+
+namespace application_lourde.Examples;
+
+/// <summary>
+/// Exemple d'utilisation du ProduitImageService dans une fenêtre WPF
+/// </summary>
+public partial class AjouterProduitWindow : Window
+{
+    private readonly ProduitImageService _produitService;
+    private string _cheminImageSelectionnee = string.Empty;
+
+    public AjouterProduitWindow()
+    {
+        InitializeComponent();
+
+        // Récupération de la chaîne de connexion depuis appsettings.json
+        var connectionString = "Server=localhost;Port=3306;Database=epreuve_e6;User=root;Password=;";
+        _produitService = new ProduitImageService(connectionString);
+    }
+
+    /// <summary>
+    /// Bouton pour sélectionner une image
+    /// </summary>
+    private void BtnSelectionnerImage_Click(object sender, RoutedEventArgs e)
+    {
+        var openFileDialog = new OpenFileDialog
+        {
+            Title = "Sélectionner une image",
+            Filter = "Images (*.jpg;*.jpeg;*.png;*.gif;*.bmp)|*.jpg;*.jpeg;*.png;*.gif;*.bmp|Tous les fichiers (*.*)|*.*",
+            FilterIndex = 1
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            _cheminImageSelectionnee = openFileDialog.FileName;
+            
+            // Affichage d'un aperçu (optionnel)
+            // ImagePreview.Source = new BitmapImage(new Uri(_cheminImageSelectionnee));
+            
+            MessageBox.Show($"Image sélectionnée : {Path.GetFileName(_cheminImageSelectionnee)}", 
+                          "Succès", 
+                          MessageBoxButton.OK, 
+                          MessageBoxImage.Information);
+        }
+    }
+
+    /// <summary>
+    /// Bouton pour ajouter le produit
+    /// </summary>
+    private async void BtnAjouter_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            // Validation des champs
+            if (string.IsNullOrWhiteSpace(TxtLibelle.Text))
+            {
+                MessageBox.Show("Le libellé est obligatoire", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!decimal.TryParse(TxtPrixHT.Text, out decimal prixHT) || prixHT < 0)
+            {
+                MessageBox.Show("Prix HT invalide", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!decimal.TryParse(TxtTVA.Text, out decimal tva) || tva < 0)
+            {
+                MessageBox.Show("TVA invalide", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!int.TryParse(TxtStock.Text, out int stock) || stock < 0)
+            {
+                MessageBox.Show("Stock invalide", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_cheminImageSelectionnee))
+            {
+                MessageBox.Show("Veuillez sélectionner une image", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Désactivation du bouton pendant le traitement
+            BtnAjouter.IsEnabled = false;
+            BtnAjouter.Content = "Ajout en cours...";
+
+            // Ajout du produit
+            int produitId = await _produitService.AjouterProduitAsync(
+                libelle: TxtLibelle.Text,
+                description: TxtDescription.Text,
+                prixHT: prixHT,
+                tva: tva,
+                stock: stock,
+                categorie: CmbCategorie.Text,
+                cheminImage: _cheminImageSelectionnee
+            );
+
+            MessageBox.Show($"Produit ajouté avec succès ! ID: {produitId}", 
+                          "Succès", 
+                          MessageBoxButton.OK, 
+                          MessageBoxImage.Information);
+
+            // Réinitialisation du formulaire
+            ResetFormulaire();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors de l'ajout du produit :\n{ex.Message}", 
+                          "Erreur", 
+                          MessageBoxButton.OK, 
+                          MessageBoxImage.Error);
+        }
+        finally
+        {
+            BtnAjouter.IsEnabled = true;
+            BtnAjouter.Content = "Ajouter";
+        }
+    }
+
+    /// <summary>
+    /// Réinitialise le formulaire
+    /// </summary>
+    private void ResetFormulaire()
+    {
+        TxtLibelle.Clear();
+        TxtDescription.Clear();
+        TxtPrixHT.Clear();
+        TxtTVA.Text = "20.00";
+        TxtStock.Clear();
+        CmbCategorie.SelectedIndex = -1;
+        _cheminImageSelectionnee = string.Empty;
+    }
+}
+
+// ==========================================
+// EXEMPLE XAML ASSOCIÉ
+// ==========================================
+/*
+<Window x:Class="application_lourde.Examples.AjouterProduitWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ajouter un produit" 
+        Height="600" 
+        Width="500"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" 
+                   Text="Ajouter un nouveau produit" 
+                   FontSize="20" 
+                   FontWeight="Bold" 
+                   Margin="0,0,0,20"/>
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="Libellé *" FontWeight="SemiBold"/>
+            <TextBox x:Name="TxtLibelle" Padding="5"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <TextBlock Text="Description" FontWeight="SemiBold"/>
+            <TextBox x:Name="TxtDescription" 
+                     Padding="5" 
+                     Height="80" 
+                     TextWrapping="Wrap" 
+                     AcceptsReturn="True"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Margin="0,0,0,10">
+            <TextBlock Text="Catégorie" FontWeight="SemiBold"/>
+            <ComboBox x:Name="CmbCategorie" Padding="5">
+                <ComboBoxItem Content="Fruits & Légumes"/>
+                <ComboBoxItem Content="Boulangerie"/>
+                <ComboBoxItem Content="Crémerie"/>
+                <ComboBoxItem Content="Épicerie"/>
+                <ComboBoxItem Content="Boissons"/>
+                <ComboBoxItem Content="Viandes & Poissons"/>
+                <ComboBoxItem Content="Surgelés"/>
+            </ComboBox>
+        </StackPanel>
+
+        <Grid Grid.Row="4" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                <TextBlock Text="Prix HT *" FontWeight="SemiBold"/>
+                <TextBox x:Name="TxtPrixHT" Padding="5"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Margin="5,0">
+                <TextBlock Text="TVA (%) *" FontWeight="SemiBold"/>
+                <TextBox x:Name="TxtTVA" Padding="5" Text="20.00"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Margin="5,0,0,0">
+                <TextBlock Text="Stock *" FontWeight="SemiBold"/>
+                <TextBox x:Name="TxtStock" Padding="5" Text="0"/>
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="5" Margin="0,0,0,10">
+            <TextBlock Text="Image du produit *" FontWeight="SemiBold"/>
+            <Button x:Name="BtnSelectionnerImage" 
+                    Content="📁 Sélectionner une image" 
+                    Padding="10,5" 
+                    Click="BtnSelectionnerImage_Click"
+                    HorizontalAlignment="Left"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="6" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Margin="0,20,0,0">
+            <Button Content="Annuler" 
+                    Width="100" 
+                    Padding="10,5" 
+                    Margin="0,0,10,0"
+                    Click="BtnAnnuler_Click"/>
+            <Button x:Name="BtnAjouter" 
+                    Content="Ajouter" 
+                    Width="100" 
+                    Padding="10,5"
+                    Click="BtnAjouter_Click"
+                    Background="#0078D4"
+                    Foreground="White"/>
+        </StackPanel>
+    </Grid>
+</Window>
+*/

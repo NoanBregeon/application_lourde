@@ -1,0 +1,192 @@
+﻿-- Script SQL adapté à la structure existante de epreuve_e6
+-- Base de données: epreuve_e6
+
+USE epreuve_e6;
+
+-- =============================================
+-- 1. TABLE CLIENTS (si elle n'existe pas déjà)
+-- =============================================
+CREATE TABLE IF NOT EXISTS clients (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nom VARCHAR(100) NOT NULL,
+    prenom VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE,
+    telephone VARCHAR(20),
+    adresse TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =============================================
+-- 2. TABLE PRODUITS
+-- =============================================
+CREATE TABLE IF NOT EXISTS produits (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    libelle VARCHAR(200) NOT NULL,
+    reference VARCHAR(50) UNIQUE NOT NULL,
+    prix_ht DECIMAL(10,2) NOT NULL,
+    taux_tva DECIMAL(5,2) NOT NULL DEFAULT 20.00,
+    stock INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =============================================
+-- 3. TABLE COMMANDES (si elle n'existe pas)
+-- =============================================
+CREATE TABLE IF NOT EXISTS commandes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    client_id INT NOT NULL,
+    numero_commande VARCHAR(50) NOT NULL UNIQUE,
+    statut ENUM('A_PREPARER', 'EN_PREPARATION', 'PRETE', 'ANNULEE') DEFAULT 'A_PREPARER',
+    creneau_retrait DATETIME DEFAULT NULL,
+    total_ht DECIMAL(10, 2) DEFAULT 0,
+    total_ttc DECIMAL(10, 2) DEFAULT 0,
+    note_interne TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
+    INDEX idx_statut (statut),
+    INDEX idx_creneau_retrait (creneau_retrait)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =============================================
+-- 4. TABLE LIGNES_COMMANDE (si elle n'existe pas)
+-- =============================================
+CREATE TABLE IF NOT EXISTS lignes_commande (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    commande_id INT NOT NULL,
+    produit_id INT NOT NULL,
+    quantite_demandee INT NOT NULL,
+    quantite_preparee INT DEFAULT 0,
+    prix_unitaire_ht DECIMAL(10,2),
+    en_rupture TINYINT(1) DEFAULT 0,
+    FOREIGN KEY (commande_id) REFERENCES commandes(id) ON DELETE CASCADE,
+    FOREIGN KEY (produit_id) REFERENCES produits(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =============================================
+-- INSERTION DES DONNÉES DE TEST
+-- =============================================
+
+-- Insertion de clients de test
+INSERT INTO clients (nom, prenom, email, telephone) VALUES
+('Dupont', 'Jean', 'jean.dupont@email.com', '0601020304'),
+('Martin', 'Marie', 'marie.martin@email.com', '0602030405'),
+('Bernard', 'Pierre', 'pierre.bernard@email.com', '0603040506'),
+('Durand', 'Sophie', 'sophie.durand@email.com', '0604050607'),
+('Petit', 'Luc', 'luc.petit@email.com', '0605060708')
+ON DUPLICATE KEY UPDATE nom=VALUES(nom);
+
+-- Insertion de produits de test
+INSERT INTO produits (libelle, reference, prix_ht, taux_tva, stock) VALUES
+('Pommes Golden 1kg', 'FRUIT-001', 2.50, 5.50, 50),
+('Bananes 1kg', 'FRUIT-002', 1.80, 5.50, 30),
+('Oranges 1kg', 'FRUIT-003', 2.20, 5.50, 40),
+('Pain de campagne', 'BOUL-001', 1.50, 5.50, 25),
+('Lait demi-écrémé 1L', 'LAIT-001', 0.95, 5.50, 60),
+('Eau minérale 6x1.5L', 'BOIS-001', 3.50, 5.50, 35),
+('Chocolat noir 200g', 'CHOC-001', 2.80, 20.00, 3),
+('Fromage Comté 250g', 'FROM-001', 4.50, 5.50, 2),
+('Yaourts nature x12', 'YAGO-001', 2.30, 5.50, 4),
+('Biscuits chocolat 300g', 'BISC-001', 2.10, 20.00, 3)
+ON DUPLICATE KEY UPDATE stock=VALUES(stock);
+
+-- Insertion de commandes de test (en utilisant la structure existante)
+-- Note: Ajustez les IDs clients selon vos données
+INSERT INTO commandes (client_id, numero_commande, statut, creneau_retrait, total_ht, total_ttc, note_interne) 
+SELECT 
+    c.id,
+    CONCAT('CMD-2024-', LPAD(c.id, 3, '0')),
+    CASE c.id
+        WHEN 1 THEN 'A_PREPARER'
+        WHEN 2 THEN 'EN_PREPARATION'
+        WHEN 3 THEN 'A_PREPARER'
+        WHEN 4 THEN 'PRETE'
+        WHEN 5 THEN 'PRETE'
+    END,
+    DATE_ADD(NOW(), INTERVAL c.id HOUR),
+    0.00,
+    0.00,
+    CONCAT('Commande test pour ', c.prenom, ' ', c.nom)
+FROM clients c
+WHERE c.id BETWEEN 1 AND 5
+ON DUPLICATE KEY UPDATE statut=VALUES(statut);
+
+-- Insertion de lignes de commande
+-- Commande 1 (Dupont - A_PREPARER)
+INSERT INTO lignes_commande (commande_id, produit_id, quantite_demandee, quantite_preparee, prix_unitaire_ht, en_rupture)
+SELECT cmd.id, p.id, 5, 0, p.prix_ht, 0
+FROM commandes cmd, produits p
+WHERE cmd.numero_commande = 'CMD-2024-001' AND p.reference = 'FRUIT-001'
+ON DUPLICATE KEY UPDATE quantite_demandee=VALUES(quantite_demandee);
+
+INSERT INTO lignes_commande (commande_id, produit_id, quantite_demandee, quantite_preparee, prix_unitaire_ht, en_rupture)
+SELECT cmd.id, p.id, 2, 0, p.prix_ht, 0
+FROM commandes cmd, produits p
+WHERE cmd.numero_commande = 'CMD-2024-001' AND p.reference = 'LAIT-001'
+ON DUPLICATE KEY UPDATE quantite_demandee=VALUES(quantite_demandee);
+
+INSERT INTO lignes_commande (commande_id, produit_id, quantite_demandee, quantite_preparee, prix_unitaire_ht, en_rupture)
+SELECT cmd.id, p.id, 1, 0, p.prix_ht, 0
+FROM commandes cmd, produits p
+WHERE cmd.numero_commande = 'CMD-2024-001' AND p.reference = 'BOUL-001'
+ON DUPLICATE KEY UPDATE quantite_demandee=VALUES(quantite_demandee);
+
+-- Commande 2 (Martin - EN_PREPARATION)
+INSERT INTO lignes_commande (commande_id, produit_id, quantite_demandee, quantite_preparee, prix_unitaire_ht, en_rupture)
+SELECT cmd.id, p.id, 3, 3, p.prix_ht, 0
+FROM commandes cmd, produits p
+WHERE cmd.numero_commande = 'CMD-2024-002' AND p.reference = 'FRUIT-002'
+ON DUPLICATE KEY UPDATE quantite_preparee=VALUES(quantite_preparee);
+
+INSERT INTO lignes_commande (commande_id, produit_id, quantite_demandee, quantite_preparee, prix_unitaire_ht, en_rupture)
+SELECT cmd.id, p.id, 1, 0, p.prix_ht, 0
+FROM commandes cmd, produits p
+WHERE cmd.numero_commande = 'CMD-2024-002' AND p.reference = 'BOIS-001'
+ON DUPLICATE KEY UPDATE quantite_demandee=VALUES(quantite_demandee);
+
+-- Commande 3 (Bernard - A_PREPARER)
+INSERT INTO lignes_commande (commande_id, produit_id, quantite_demandee, quantite_preparee, prix_unitaire_ht, en_rupture)
+SELECT cmd.id, p.id, 2, 0, p.prix_ht, 0
+FROM commandes cmd, produits p
+WHERE cmd.numero_commande = 'CMD-2024-003' AND p.reference = 'FROM-001'
+ON DUPLICATE KEY UPDATE quantite_demandee=VALUES(quantite_demandee);
+
+INSERT INTO lignes_commande (commande_id, produit_id, quantite_demandee, quantite_preparee, prix_unitaire_ht, en_rupture)
+SELECT cmd.id, p.id, 4, 0, p.prix_ht, 1
+FROM commandes cmd, produits p
+WHERE cmd.numero_commande = 'CMD-2024-003' AND p.reference = 'CHOC-001'
+ON DUPLICATE KEY UPDATE en_rupture=VALUES(en_rupture);
+
+-- Commande 4 (Durand - PRETE - Historique)
+INSERT INTO lignes_commande (commande_id, produit_id, quantite_demandee, quantite_preparee, prix_unitaire_ht, en_rupture)
+SELECT cmd.id, p.id, 6, 6, p.prix_ht, 0
+FROM commandes cmd, produits p
+WHERE cmd.numero_commande = 'CMD-2024-004' AND p.reference = 'YAGO-001'
+ON DUPLICATE KEY UPDATE quantite_preparee=VALUES(quantite_preparee);
+
+-- Mise à jour des totaux des commandes
+UPDATE commandes c
+SET total_ht = (
+    SELECT COALESCE(SUM(lc.quantite_demandee * lc.prix_unitaire_ht), 0)
+    FROM lignes_commande lc
+    WHERE lc.commande_id = c.id
+),
+total_ttc = (
+    SELECT COALESCE(SUM(lc.quantite_demandee * lc.prix_unitaire_ht * (1 + p.taux_tva / 100)), 0)
+    FROM lignes_commande lc
+    JOIN produits p ON lc.produit_id = p.id
+    WHERE lc.commande_id = c.id
+);
+
+-- =============================================
+-- VERIFICATION
+-- =============================================
+SELECT 'Nombre de clients:' as Info, COUNT(*) as Total FROM clients;
+SELECT 'Nombre de produits:' as Info, COUNT(*) as Total FROM produits;
+SELECT 'Nombre de commandes:' as Info, COUNT(*) as Total FROM commandes;
+SELECT 'Nombre de lignes de commande:' as Info, COUNT(*) as Total FROM lignes_commande;
+
+SELECT 'Produits en stock faible (< 5):' as Info, COUNT(*) as Total FROM produits WHERE stock < 5;
+SELECT 'Commandes à préparer:' as Info, COUNT(*) as Total FROM commandes WHERE statut IN ('A_PREPARER', 'EN_PREPARATION');

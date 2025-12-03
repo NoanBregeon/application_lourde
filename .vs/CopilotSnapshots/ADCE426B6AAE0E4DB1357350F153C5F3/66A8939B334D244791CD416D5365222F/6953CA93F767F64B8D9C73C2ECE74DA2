@@ -1,0 +1,13 @@
+﻿namespace application_lourde.Models;
+
+public class CommandeLigne
+{
+    public int Id { get; set; }
+    public int CommandeId { get; set; }
+    public int ProduitId { get; set; }
+    public string ProduitLibelle { get; set; } = string.Empty;
+    public int QuantiteDemandee { get; set; }
+    public int StockDisponible { get; set; }
+    public int QuantitePreparee { get; set; }
+    public bool EnRupture { get; set; }
+}

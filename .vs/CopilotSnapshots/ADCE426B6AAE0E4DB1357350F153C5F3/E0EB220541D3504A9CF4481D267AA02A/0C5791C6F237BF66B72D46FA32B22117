@@ -1,0 +1,11 @@
+﻿namespace application_lourde.Models;
+
+public class Commande
+{
+    public int Id { get; set; }
+    public string Numero { get; set; } = string.Empty;
+    public string Client { get; set; } = string.Empty;
+    public DateTime Creneau { get; set; }
+    public string Statut { get; set; } = "EN_ATTENTE";
+    public List<CommandeLigne> Lignes { get; set; } = new();
+}

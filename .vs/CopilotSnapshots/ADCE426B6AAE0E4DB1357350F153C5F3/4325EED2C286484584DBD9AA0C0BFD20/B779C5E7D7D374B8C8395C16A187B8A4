@@ -1,0 +1,443 @@
+﻿using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
+using application_lourde.Models;
+using application_lourde.Services;
+
+namespace application_lourde.ViewModels;
+
+public class StockViewModel : ViewModelBase
+{
+    private readonly IStockService _stockService;
+
+    private ObservableCollection<Produit> _produits = new();
+    private ObservableCollection<Produit> _produitsStockFaible = new();
+    private Produit? _produitSelectionne;
+    private string _rechercheTexte = string.Empty;
+    private bool _isLoading;
+
+    public ObservableCollection<Produit> Produits
+    {
+        get => _produits;
+        set => SetProperty(ref _produits, value);
+    }
+
+    public ObservableCollection<Produit> ProduitsStockFaible
+    {
+        get => _produitsStockFaible;
+        set => SetProperty(ref _produitsStockFaible, value);
+    }
+
+    public Produit? ProduitSelectionne
+    {
+        get => _produitSelectionne;
+        set => SetProperty(ref _produitSelectionne, value);
+    }
+
+    public string RechercheTexte
+    {
+        get => _rechercheTexte;
+        set
+        {
+            if (SetProperty(ref _rechercheTexte, value))
+            {
+                RechercherAsync();
+            }
+        }
+    }
+
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set => SetProperty(ref _isLoading, value);
+    }
+
+    public ICommand AjouterProduitCommand { get; }
+    public ICommand ModifierProduitCommand { get; }
+    public ICommand SupprimerProduitCommand { get; }
+    public ICommand ModifierStockCommand { get; }
+
+    public StockViewModel(IStockService stockService)
+    {
+        _stockService = stockService;
+
+        AjouterProduitCommand = new RelayCommand(_ => AjouterProduit());
+        ModifierProduitCommand = new RelayCommand(_ => ModifierProduit(), _ => ProduitSelectionne != null);
+        SupprimerProduitCommand = new RelayCommand(_ => SupprimerProduit(), _ => ProduitSelectionne != null);
+        ModifierStockCommand = new RelayCommand(_ => ModifierStock(), _ => ProduitSelectionne != null);
+    }
+
+    public async void LoadDataAsync()
+    {
+        await ChargerProduitsAsync();
+        await ChargerProduitsStockFaibleAsync();
+    }
+
+    private async Task ChargerProduitsAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            var produits = await _stockService.GetAllProduitsAsync();
+            Produits = new ObservableCollection<Produit>(produits);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors du chargement des produits : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task ChargerProduitsStockFaibleAsync()
+    {
+        try
+        {
+            var produits = await _stockService.GetProduitsStockFaibleAsync();
+            ProduitsStockFaible = new ObservableCollection<Produit>(produits);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors du chargement des produits en stock faible : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async void RechercherAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            var produits = await _stockService.SearchProduitsAsync(RechercheTexte);
+            Produits = new ObservableCollection<Produit>(produits);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors de la recherche : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void AjouterProduit()
+    {
+        var dialog = new ProduitDialog();
+        if (dialog.ShowDialog() == true && dialog.Produit != null)
+        {
+            AjouterProduitAsync(dialog.Produit);
+        }
+    }
+
+    private async void AjouterProduitAsync(Produit produit)
+    {
+        try
+        {
+            IsLoading = true;
+            var success = await _stockService.AjouterProduitAsync(produit);
+            if (success)
+            {
+                MessageBox.Show("Produit ajouté avec succès", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                await ChargerProduitsAsync();
+                await ChargerProduitsStockFaibleAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors de l'ajout du produit : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ModifierProduit()
+    {
+        if (ProduitSelectionne == null) return;
+
+        var dialog = new ProduitDialog(ProduitSelectionne);
+        if (dialog.ShowDialog() == true && dialog.Produit != null)
+        {
+            ModifierProduitAsync(dialog.Produit);
+        }
+    }
+
+    private async void ModifierProduitAsync(Produit produit)
+    {
+        try
+        {
+            IsLoading = true;
+            var success = await _stockService.ModifierProduitAsync(produit);
+            if (success)
+            {
+                MessageBox.Show("Produit modifié avec succès", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                await ChargerProduitsAsync();
+                await ChargerProduitsStockFaibleAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors de la modification du produit : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void SupprimerProduit()
+    {
+        if (ProduitSelectionne == null) return;
+
+        var result = MessageBox.Show(
+            $"Êtes-vous sûr de vouloir supprimer le produit '{ProduitSelectionne.Libelle}' ?",
+            "Confirmation",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result == MessageBoxResult.Yes)
+        {
+            SupprimerProduitAsync(ProduitSelectionne.Id);
+        }
+    }
+
+    private async void SupprimerProduitAsync(int produitId)
+    {
+        try
+        {
+            IsLoading = true;
+            var success = await _stockService.SupprimerProduitAsync(produitId);
+            if (success)
+            {
+                MessageBox.Show("Produit supprimé avec succès", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                await ChargerProduitsAsync();
+                await ChargerProduitsStockFaibleAsync();
+                ProduitSelectionne = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors de la suppression du produit : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ModifierStock()
+    {
+        if (ProduitSelectionne == null) return;
+
+        var dialog = new StockDialog(ProduitSelectionne);
+        if (dialog.ShowDialog() == true)
+        {
+            ModifierStockAsync(ProduitSelectionne.Id, dialog.NouveauStock);
+        }
+    }
+
+    private async void ModifierStockAsync(int produitId, int nouveauStock)
+    {
+        try
+        {
+            IsLoading = true;
+            var success = await _stockService.ModifierStockAsync(produitId, nouveauStock);
+            if (success)
+            {
+                MessageBox.Show("Stock modifié avec succès", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                await ChargerProduitsAsync();
+                await ChargerProduitsStockFaibleAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Erreur lors de la modification du stock : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}
+
+public class ProduitDialog : Window
+{
+    public Produit? Produit { get; private set; }
+
+    public ProduitDialog(Produit? produitExistant = null)
+    {
+        Title = produitExistant == null ? "Ajouter un produit" : "Modifier un produit";
+        Width = 400;
+        Height = 350;
+        WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+        Produit = produitExistant == null 
+            ? new Produit() 
+            : new Produit 
+            { 
+                Id = produitExistant.Id,
+                Libelle = produitExistant.Libelle,
+                Reference = produitExistant.Reference,
+                PrixHT = produitExistant.PrixHT,
+                TauxTVA = produitExistant.TauxTVA,
+                Stock = produitExistant.Stock
+            };
+
+        var grid = new System.Windows.Controls.Grid { Margin = new Thickness(20) };
+        for (int i = 0; i < 6; i++)
+            grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+        var libelleLabel = new System.Windows.Controls.Label { Content = "Libellé :" };
+        System.Windows.Controls.Grid.SetRow(libelleLabel, 0);
+        var libelleTextBox = new System.Windows.Controls.TextBox { Text = Produit.Libelle };
+        System.Windows.Controls.Grid.SetRow(libelleTextBox, 0);
+        libelleTextBox.Margin = new Thickness(0, 25, 0, 0);
+
+        var referenceLabel = new System.Windows.Controls.Label { Content = "Référence :" };
+        System.Windows.Controls.Grid.SetRow(referenceLabel, 1);
+        var referenceTextBox = new System.Windows.Controls.TextBox { Text = Produit.Reference };
+        System.Windows.Controls.Grid.SetRow(referenceTextBox, 1);
+        referenceTextBox.Margin = new Thickness(0, 25, 0, 0);
+
+        var prixHTLabel = new System.Windows.Controls.Label { Content = "Prix HT :" };
+        System.Windows.Controls.Grid.SetRow(prixHTLabel, 2);
+        var prixHTTextBox = new System.Windows.Controls.TextBox { Text = Produit.PrixHT.ToString() };
+        System.Windows.Controls.Grid.SetRow(prixHTTextBox, 2);
+        prixHTTextBox.Margin = new Thickness(0, 25, 0, 0);
+
+        var tauxTVALabel = new System.Windows.Controls.Label { Content = "Taux TVA (%) :" };
+        System.Windows.Controls.Grid.SetRow(tauxTVALabel, 3);
+        var tauxTVATextBox = new System.Windows.Controls.TextBox { Text = Produit.TauxTVA.ToString() };
+        System.Windows.Controls.Grid.SetRow(tauxTVATextBox, 3);
+        tauxTVATextBox.Margin = new Thickness(0, 25, 0, 0);
+
+        var stockLabel = new System.Windows.Controls.Label { Content = "Stock :" };
+        System.Windows.Controls.Grid.SetRow(stockLabel, 4);
+        var stockTextBox = new System.Windows.Controls.TextBox { Text = Produit.Stock.ToString() };
+        System.Windows.Controls.Grid.SetRow(stockTextBox, 4);
+        stockTextBox.Margin = new Thickness(0, 25, 0, 0);
+
+        var buttonPanel = new System.Windows.Controls.StackPanel 
+        { 
+            Orientation = System.Windows.Controls.Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right
+        };
+        System.Windows.Controls.Grid.SetRow(buttonPanel, 7);
+
+        var okButton = new System.Windows.Controls.Button { Content = "Enregistrer", Width = 100 };
+        okButton.Click += (s, e) =>
+        {
+            if (string.IsNullOrWhiteSpace(libelleTextBox.Text))
+            {
+                MessageBox.Show("Le libellé est obligatoire", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            Produit!.Libelle = libelleTextBox.Text;
+            Produit.Reference = referenceTextBox.Text;
+            Produit.PrixHT = decimal.TryParse(prixHTTextBox.Text, out var prixHT) ? prixHT : 0;
+            Produit.TauxTVA = decimal.TryParse(tauxTVATextBox.Text, out var tauxTVA) ? tauxTVA : 0;
+            Produit.Stock = int.TryParse(stockTextBox.Text, out var stock) ? stock : 0;
+
+            DialogResult = true;
+            Close();
+        };
+
+        var cancelButton = new System.Windows.Controls.Button { Content = "Annuler", Width = 100 };
+        cancelButton.Click += (s, e) =>
+        {
+            DialogResult = false;
+            Close();
+        };
+
+        buttonPanel.Children.Add(okButton);
+        buttonPanel.Children.Add(cancelButton);
+
+        grid.Children.Add(libelleLabel);
+        grid.Children.Add(libelleTextBox);
+        grid.Children.Add(referenceLabel);
+        grid.Children.Add(referenceTextBox);
+        grid.Children.Add(prixHTLabel);
+        grid.Children.Add(prixHTTextBox);
+        grid.Children.Add(tauxTVALabel);
+        grid.Children.Add(tauxTVATextBox);
+        grid.Children.Add(stockLabel);
+        grid.Children.Add(stockTextBox);
+        grid.Children.Add(buttonPanel);
+
+        Content = grid;
+    }
+}
+
+public class StockDialog : Window
+{
+    public int NouveauStock { get; private set; }
+
+    public StockDialog(Produit produit)
+    {
+        Title = "Modifier le stock";
+        Width = 300;
+        Height = 180;
+        WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+        var grid = new System.Windows.Controls.Grid { Margin = new Thickness(20) };
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        grid.RowDefinitions.Add(new System.Windows.Controls.RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+        var infoLabel = new System.Windows.Controls.Label { Content = $"Produit : {produit.Libelle}\nStock actuel : {produit.Stock}" };
+        System.Windows.Controls.Grid.SetRow(infoLabel, 0);
+
+        var stockLabel = new System.Windows.Controls.Label { Content = "Nouveau stock :" };
+        System.Windows.Controls.Grid.SetRow(stockLabel, 1);
+
+        var stockTextBox = new System.Windows.Controls.TextBox { Text = produit.Stock.ToString() };
+        System.Windows.Controls.Grid.SetRow(stockTextBox, 1);
+        stockTextBox.Margin = new Thickness(0, 25, 0, 0);
+
+        var buttonPanel = new System.Windows.Controls.StackPanel 
+        { 
+            Orientation = System.Windows.Controls.Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right
+        };
+        System.Windows.Controls.Grid.SetRow(buttonPanel, 3);
+
+        var okButton = new System.Windows.Controls.Button { Content = "Enregistrer", Width = 100 };
+        okButton.Click += (s, e) =>
+        {
+            if (int.TryParse(stockTextBox.Text, out var stock) && stock >= 0)
+            {
+                NouveauStock = stock;
+                DialogResult = true;
+                Close();
+            }
+            else
+            {
+                MessageBox.Show("Veuillez entrer un stock valide", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        };
+
+        var cancelButton = new System.Windows.Controls.Button { Content = "Annuler", Width = 100 };
+        cancelButton.Click += (s, e) =>
+        {
+            DialogResult = false;
+            Close();
+        };
+
+        buttonPanel.Children.Add(okButton);
+        buttonPanel.Children.Add(cancelButton);
+
+        grid.Children.Add(infoLabel);
+        grid.Children.Add(stockLabel);
+        grid.Children.Add(stockTextBox);
+        grid.Children.Add(buttonPanel);
+
+        Content = grid;
+    }
+}

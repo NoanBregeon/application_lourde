@@ -1,0 +1,154 @@
+﻿using Dapper;
+using application_lourde.Models;
+
+namespace application_lourde.DAL;
+
+public class CommandeRepository : ICommandeRepository
+{
+    private readonly IDbConnector _dbConnector;
+
+    public CommandeRepository(IDbConnector dbConnector)
+    {
+        _dbConnector = dbConnector;
+    }
+
+    public async Task<IEnumerable<Commande>> GetAllAsync()
+    {
+        using var connection = _dbConnector.CreateConnection();
+        var sql = @"
+            SELECT c.*, 
+                   COALESCE(CONCAT(cl.prenom, ' ', cl.nom), 'Client inconnu') as Client
+            FROM commandes c
+            LEFT JOIN clients cl ON c.client_id = cl.id
+            ORDER BY c.created_at DESC";
+        
+        return await connection.QueryAsync<Commande>(sql);
+    }
+
+    public async Task<Commande?> GetByIdAsync(int id)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        var sql = @"
+            SELECT c.*, 
+                   COALESCE(CONCAT(cl.prenom, ' ', cl.nom), 'Client inconnu') as Client
+            FROM commandes c
+            LEFT JOIN clients cl ON c.client_id = cl.id
+            WHERE c.id = @Id";
+        
+        return await connection.QueryFirstOrDefaultAsync<Commande>(sql, new { Id = id });
+    }
+
+    public async Task<IEnumerable<CommandeLigne>> GetLignesAsync(int commandeId)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        var sql = @"
+            SELECT lc.id as Id, 
+                   lc.commande_id as CommandeId, 
+                   lc.produit_id as ProduitId,
+                   lc.quantite_demandee as QuantiteDemandee,
+                   lc.quantite_preparee as QuantitePreparee,
+                   lc.prix_unitaire_ht as PrixUnitaireHT,
+                   lc.statut_ligne as StatutLigne,
+                   lc.note as Note,
+                   p.libelle as ProduitLibelle,
+                   p.stock as StockDisponible
+            FROM lignes_commandes lc
+            INNER JOIN produits p ON lc.produit_id = p.id
+            WHERE lc.commande_id = @CommandeId";
+        
+        return await connection.QueryAsync<CommandeLigne>(sql, new { CommandeId = commandeId });
+    }
+
+    public async Task<IEnumerable<Commande>> GetCommandesAPreparerAsync()
+    {
+        using var connection = _dbConnector.CreateConnection();
+        var sql = @"
+            SELECT c.*, 
+                   COALESCE(CONCAT(cl.prenom, ' ', cl.nom), 'Client inconnu') as Client
+            FROM commandes c
+            LEFT JOIN clients cl ON c.client_id = cl.id
+            WHERE c.statut IN ('A_PREPARER', 'EN_PREPARATION')
+            ORDER BY c.creneau_retrait";
+        
+        return await connection.QueryAsync<Commande>(sql);
+    }
+
+    public async Task<IEnumerable<Commande>> GetHistoriqueAsync()
+    {
+        using var connection = _dbConnector.CreateConnection();
+        var sql = @"
+            SELECT c.*, 
+                   COALESCE(CONCAT(cl.prenom, ' ', cl.nom), 'Client inconnu') as Client
+            FROM commandes c
+            LEFT JOIN clients cl ON c.client_id = cl.id
+            WHERE c.statut = 'PRETE'
+            ORDER BY c.creneau_retrait DESC
+            LIMIT 50";
+        
+        return await connection.QueryAsync<Commande>(sql);
+    }
+
+    public async Task<int> CreatePreparationAsync(int commandeId)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        
+        // Mettre à jour le statut de la commande
+        var sql = @"
+            UPDATE commandes 
+            SET statut = 'EN_PREPARATION',
+                updated_at = NOW()
+            WHERE id = @Id AND statut = 'A_PREPARER'";
+        
+        await connection.ExecuteAsync(sql, new { Id = commandeId });
+        return commandeId;
+    }
+
+    public async Task<bool> UpdateLignePreparationAsync(int preparationId, int commandeLigneId, int quantite, bool enRupture)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        
+        var statut = enRupture ? "RUPTURE" : "VALIDEE";
+        
+        var sql = @"
+            UPDATE lignes_commandes 
+            SET quantite_preparee = @Quantite,
+                statut_ligne = @Statut
+            WHERE id = @Id";
+        
+        var result = await connection.ExecuteAsync(sql, new 
+        { 
+            Id = commandeLigneId, 
+            Quantite = quantite, 
+            Statut = statut 
+        });
+        
+        return result > 0;
+    }
+
+    public async Task<bool> FinaliserCommandeAsync(int commandeId)
+    {
+        using var connection = _dbConnector.CreateConnection();
+        
+        // Mettre à jour les stocks
+        var updateStockSql = @"
+            UPDATE produits p
+            INNER JOIN lignes_commandes lc ON p.id = lc.produit_id
+            SET p.stock = p.stock - lc.quantite_preparee
+            WHERE lc.commande_id = @CommandeId 
+            AND lc.statut_ligne = 'VALIDEE'
+            AND lc.quantite_preparee > 0";
+        
+        await connection.ExecuteAsync(updateStockSql, new { CommandeId = commandeId });
+        
+        // Mettre à jour le statut de la commande
+        var updateCommandeSql = @"
+            UPDATE commandes 
+            SET statut = 'PRETE',
+                updated_at = NOW()
+            WHERE id = @Id";
+        
+        var result = await connection.ExecuteAsync(updateCommandeSql, new { Id = commandeId });
+        
+        return result > 0;
+    }
+}

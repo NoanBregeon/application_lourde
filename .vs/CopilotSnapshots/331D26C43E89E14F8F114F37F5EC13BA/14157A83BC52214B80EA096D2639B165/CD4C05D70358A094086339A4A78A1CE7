@@ -1,0 +1,337 @@
+﻿using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
+using Microsoft.Win32;
+using application_lourde.Models;
+
+namespace application_lourde.Views.Dialogs;
+
+public class ProduitDialogAvecImage : Window
+{
+    public Produit? Produit { get; private set; }
+    public string? CheminImage { get; private set; }
+    
+    private readonly TextBox _libelleTextBox;
+    private readonly TextBox _referenceTextBox;
+    private readonly TextBox _descriptionTextBox;
+    private readonly ComboBox _categorieComboBox;
+    private readonly TextBox _prixHTTextBox;
+    private readonly TextBox _tauxTVATextBox;
+    private readonly TextBox _stockTextBox;
+    private readonly Image _imagePreview;
+    private readonly Button _selectionnerImageButton;
+
+    public ProduitDialogAvecImage(Produit? produitExistant = null)
+    {
+        Title = produitExistant == null ? "Ajouter un produit" : "Modifier un produit";
+        Width = 600;
+        Height = 650;
+        WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+        Produit = produitExistant == null 
+            ? new Produit() 
+            : new Produit 
+            { 
+                Id = produitExistant.Id,
+                Libelle = produitExistant.Libelle,
+                Reference = produitExistant.Reference,
+                Description = produitExistant.Description,
+                Categorie = produitExistant.Categorie,
+                PrixHT = produitExistant.PrixHT,
+                TVA = produitExistant.TVA,
+                Stock = produitExistant.Stock,
+                Image = produitExistant.Image
+            };
+
+        // Grid principal
+        var mainGrid = new Grid { Margin = new Thickness(20) };
+        
+        // Colonnes pour la mise en page
+        mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
+        mainGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(200) });
+
+        // Rangées
+        for (int i = 0; i < 10; i++)
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+        mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+
+        // Colonne gauche - Formulaire
+        var formStack = new StackPanel();
+        Grid.SetColumn(formStack, 0);
+        Grid.SetRowSpan(formStack, 11);
+
+        // Libellé
+        formStack.Children.Add(new Label { Content = "Libellé *", FontWeight = FontWeights.SemiBold });
+        _libelleTextBox = new TextBox { Text = Produit.Libelle, Padding = new Thickness(5), Margin = new Thickness(0, 0, 0, 10) };
+        formStack.Children.Add(_libelleTextBox);
+
+        // Référence
+        formStack.Children.Add(new Label { Content = "Référence *", FontWeight = FontWeights.SemiBold });
+        _referenceTextBox = new TextBox { Text = Produit.Reference, Padding = new Thickness(5), Margin = new Thickness(0, 0, 0, 10) };
+        formStack.Children.Add(_referenceTextBox);
+
+        // Description
+        formStack.Children.Add(new Label { Content = "Description", FontWeight = FontWeights.SemiBold });
+        _descriptionTextBox = new TextBox 
+        { 
+            Text = Produit.Description ?? string.Empty, 
+            Padding = new Thickness(5), 
+            Height = 80,
+            TextWrapping = TextWrapping.Wrap,
+            AcceptsReturn = true,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            Margin = new Thickness(0, 0, 0, 10)
+        };
+        formStack.Children.Add(_descriptionTextBox);
+
+        // Catégorie
+        formStack.Children.Add(new Label { Content = "Catégorie", FontWeight = FontWeights.SemiBold });
+        _categorieComboBox = new ComboBox { Padding = new Thickness(5), Margin = new Thickness(0, 0, 0, 10) };
+        _categorieComboBox.Items.Add("Fruits & Légumes");
+        _categorieComboBox.Items.Add("Boulangerie");
+        _categorieComboBox.Items.Add("Crémerie");
+        _categorieComboBox.Items.Add("Épicerie");
+        _categorieComboBox.Items.Add("Boissons");
+        _categorieComboBox.Items.Add("Viandes & Poissons");
+        _categorieComboBox.Items.Add("Surgelés");
+        
+        if (!string.IsNullOrEmpty(Produit.Categorie))
+            _categorieComboBox.Text = Produit.Categorie;
+        
+        formStack.Children.Add(_categorieComboBox);
+
+        // Prix HT et TVA sur la même ligne
+        var prixGrid = new Grid { Margin = new Thickness(0, 0, 0, 10) };
+        prixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        prixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
+        prixGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var prixStack = new StackPanel();
+        Grid.SetColumn(prixStack, 0);
+        prixStack.Children.Add(new Label { Content = "Prix HT (€) *", FontWeight = FontWeights.SemiBold });
+        _prixHTTextBox = new TextBox { Text = Produit.PrixHT.ToString("0.00"), Padding = new Thickness(5) };
+        prixStack.Children.Add(_prixHTTextBox);
+
+        var tvaStack = new StackPanel();
+        Grid.SetColumn(tvaStack, 2);
+        tvaStack.Children.Add(new Label { Content = "TVA (%) *", FontWeight = FontWeights.SemiBold });
+        _tauxTVATextBox = new TextBox { Text = Produit.TVA.ToString("0.00"), Padding = new Thickness(5) };
+        tvaStack.Children.Add(_tauxTVATextBox);
+
+        prixGrid.Children.Add(prixStack);
+        prixGrid.Children.Add(tvaStack);
+        formStack.Children.Add(prixGrid);
+
+        // Stock
+        formStack.Children.Add(new Label { Content = "Stock *", FontWeight = FontWeights.SemiBold });
+        _stockTextBox = new TextBox { Text = Produit.Stock.ToString(), Padding = new Thickness(5), Margin = new Thickness(0, 0, 0, 10) };
+        formStack.Children.Add(_stockTextBox);
+
+        mainGrid.Children.Add(formStack);
+
+        // Colonne droite - Image
+        var imageStack = new StackPanel();
+        Grid.SetColumn(imageStack, 2);
+        Grid.SetRowSpan(imageStack, 11);
+
+        imageStack.Children.Add(new Label 
+        { 
+            Content = "Image du produit", 
+            FontWeight = FontWeights.SemiBold,
+            HorizontalAlignment = HorizontalAlignment.Center 
+        });
+
+        // Cadre pour l'image
+        var imageBorder = new Border
+        {
+            Width = 180,
+            Height = 180,
+            BorderBrush = System.Windows.Media.Brushes.LightGray,
+            BorderThickness = new Thickness(2),
+            Margin = new Thickness(0, 0, 0, 10)
+        };
+
+        _imagePreview = new Image
+        {
+            Width = 176,
+            Height = 176,
+            Stretch = System.Windows.Media.Stretch.Uniform
+        };
+
+        // Charger l'image existante si disponible
+        if (!string.IsNullOrEmpty(Produit.CheminImage) && File.Exists(Produit.CheminImage))
+        {
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(Produit.CheminImage);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                _imagePreview.Source = bitmap;
+            }
+            catch
+            {
+                // Image par défaut si erreur
+                _imagePreview.Source = null;
+            }
+        }
+
+        imageBorder.Child = _imagePreview;
+        imageStack.Children.Add(imageBorder);
+
+        // Bouton sélectionner image
+        _selectionnerImageButton = new Button
+        {
+            Content = "?? Sélectionner",
+            Padding = new Thickness(10, 5, 10, 5),
+            Margin = new Thickness(0, 0, 0, 5)
+        };
+        _selectionnerImageButton.Click += SelectionnerImage_Click;
+        imageStack.Children.Add(_selectionnerImageButton);
+
+        // Bouton supprimer image
+        var supprimerImageButton = new Button
+        {
+            Content = "??? Supprimer",
+            Padding = new Thickness(10, 5, 10, 5),
+            Background = System.Windows.Media.Brushes.LightCoral
+        };
+        supprimerImageButton.Click += (s, e) =>
+        {
+            _imagePreview.Source = null;
+            CheminImage = null;
+        };
+        imageStack.Children.Add(supprimerImageButton);
+
+        mainGrid.Children.Add(imageStack);
+
+        // Boutons Enregistrer / Annuler
+        var buttonPanel = new StackPanel 
+        { 
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(0, 20, 0, 0)
+        };
+        Grid.SetRow(buttonPanel, 11);
+        Grid.SetColumnSpan(buttonPanel, 3);
+
+        var okButton = new Button 
+        { 
+            Content = "?? Enregistrer", 
+            Width = 120,
+            Padding = new Thickness(10, 5, 10, 5),
+            Margin = new Thickness(0, 0, 10, 0),
+            Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 120, 212)),
+            Foreground = System.Windows.Media.Brushes.White
+        };
+        okButton.Click += Enregistrer_Click;
+
+        var cancelButton = new Button 
+        { 
+            Content = "? Annuler", 
+            Width = 120,
+            Padding = new Thickness(10, 5, 10, 5)
+        };
+        cancelButton.Click += (s, e) =>
+        {
+            DialogResult = false;
+            Close();
+        };
+
+        buttonPanel.Children.Add(okButton);
+        buttonPanel.Children.Add(cancelButton);
+
+        mainGrid.Children.Add(buttonPanel);
+
+        Content = mainGrid;
+    }
+
+    private void SelectionnerImage_Click(object sender, RoutedEventArgs e)
+    {
+        var openFileDialog = new OpenFileDialog
+        {
+            Title = "Sélectionner une image",
+            Filter = "Images (*.jpg;*.jpeg;*.png;*.gif;*.bmp)|*.jpg;*.jpeg;*.png;*.gif;*.bmp|Tous les fichiers (*.*)|*.*",
+            FilterIndex = 1
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            CheminImage = openFileDialog.FileName;
+
+            // Afficher l'aperçu
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(CheminImage);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                _imagePreview.Source = bitmap;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement de l'image : {ex.Message}", 
+                              "Erreur", 
+                              MessageBoxButton.OK, 
+                              MessageBoxImage.Error);
+                CheminImage = null;
+            }
+        }
+    }
+
+    private void Enregistrer_Click(object sender, RoutedEventArgs e)
+    {
+        // Validation
+        if (string.IsNullOrWhiteSpace(_libelleTextBox.Text))
+        {
+            MessageBox.Show("Le libellé est obligatoire", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _libelleTextBox.Focus();
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_referenceTextBox.Text))
+        {
+            MessageBox.Show("La référence est obligatoire", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _referenceTextBox.Focus();
+            return;
+        }
+
+        if (!decimal.TryParse(_prixHTTextBox.Text, out decimal prixHT) || prixHT < 0)
+        {
+            MessageBox.Show("Le prix HT doit être un nombre valide", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _prixHTTextBox.Focus();
+            return;
+        }
+
+        if (!decimal.TryParse(_tauxTVATextBox.Text, out decimal tva) || tva < 0)
+        {
+            MessageBox.Show("La TVA doit être un nombre valide", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _tauxTVATextBox.Focus();
+            return;
+        }
+
+        if (!int.TryParse(_stockTextBox.Text, out int stock) || stock < 0)
+        {
+            MessageBox.Show("Le stock doit être un nombre valide", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            _stockTextBox.Focus();
+            return;
+        }
+
+        // Mise à jour du produit
+        Produit!.Libelle = _libelleTextBox.Text.Trim();
+        Produit.Reference = _referenceTextBox.Text.Trim();
+        Produit.Description = _descriptionTextBox.Text.Trim();
+        Produit.Categorie = _categorieComboBox.Text;
+        Produit.PrixHT = prixHT;
+        Produit.TVA = tva;
+        Produit.Stock = stock;
+
+        DialogResult = true;
+        Close();
+    }
+}

@@ -1,0 +1,281 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Fury\\source\\repos\\application_lourde\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Fury\\AppData\\Local\\Temp\\.vsdbgsrc\\5db00dcc32c2438d68438e1fcc211058187d505b791085c50320c78abe91b13b\\XamlReader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\views\\dialogs\\produitdialogavecimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:views\\dialogs\\produitdialogavecimage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\services\\produitimageservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:services\\produitimageservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\viewmodels\\stockviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:viewmodels\\stockviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\dal\\produitrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:dal\\produitrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\views\\stockview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:views\\stockview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\converters\\stringnotnulloremptytovisibilityconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:converters\\stringnotnulloremptytovisibilityconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\converters\\stringnotnulloremptytoboolconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:converters\\stringnotnulloremptytoboolconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\views\\stockview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:views\\stockview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\application_lourde.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:application_lourde.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\viewmodels\\viewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:viewmodels\\viewmodelbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\viewmodels\\relaycommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:viewmodels\\relaycommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\infrastructure\\servicecollectionextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:infrastructure\\servicecollectionextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "MainViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\MainViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\MainViewModel.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\MainViewModel.cs",
+              "RelativeToolTip": "ViewModels\\MainViewModel.cs",
+              "ViewState": "AgIAACkAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T15:02:12.758Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "App.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\App.xaml.cs",
+              "RelativeDocumentMoniker": "App.xaml.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\App.xaml.cs",
+              "RelativeToolTip": "App.xaml.cs",
+              "ViewState": "AgIAACUAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T15:00:35.745Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "XamlReader.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\AppData\\Local\\Temp\\.vsdbgsrc\\5db00dcc32c2438d68438e1fcc211058187d505b791085c50320c78abe91b13b\\XamlReader.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\5db00dcc32c2438d68438e1fcc211058187d505b791085c50320c78abe91b13b\\XamlReader.cs",
+              "ToolTip": "C:\\Users\\Fury\\AppData\\Local\\Temp\\.vsdbgsrc\\5db00dcc32c2438d68438e1fcc211058187d505b791085c50320c78abe91b13b\\XamlReader.cs",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\5db00dcc32c2438d68438e1fcc211058187d505b791085c50320c78abe91b13b\\XamlReader.cs",
+              "ViewState": "AgIAAPcBAAAAAAAAAAAAAP4BAAACAAAAAQAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T12:48:42.344Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "RelayCommand.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\RelayCommand.cs",
+              "RelativeDocumentMoniker": "ViewModels\\RelayCommand.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\RelayCommand.cs",
+              "RelativeToolTip": "ViewModels\\RelayCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T14:38:29.173Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ViewModelBase.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\ViewModelBase.cs",
+              "RelativeDocumentMoniker": "ViewModels\\ViewModelBase.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\ViewModelBase.cs",
+              "RelativeToolTip": "ViewModels\\ViewModelBase.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T14:38:21.436Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "application_lourde",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\application_lourde.csproj",
+              "RelativeDocumentMoniker": "application_lourde.csproj",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\application_lourde.csproj",
+              "RelativeToolTip": "application_lourde.csproj",
+              "ViewState": "AgIAAB8AAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-12-03T14:38:00.606Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "ServiceCollectionExtensions.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Infrastructure\\ServiceCollectionExtensions.cs",
+              "RelativeDocumentMoniker": "Infrastructure\\ServiceCollectionExtensions.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Infrastructure\\ServiceCollectionExtensions.cs",
+              "RelativeToolTip": "Infrastructure\\ServiceCollectionExtensions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T14:39:01.757Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "StockView.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Views\\StockView.xaml.cs",
+              "RelativeDocumentMoniker": "Views\\StockView.xaml.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Views\\StockView.xaml.cs",
+              "RelativeToolTip": "Views\\StockView.xaml.cs",
+              "ViewState": "AgIAABkAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T12:49:59.886Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ProduitDialogAvecImage.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Views\\Dialogs\\ProduitDialogAvecImage.cs",
+              "RelativeDocumentMoniker": "Views\\Dialogs\\ProduitDialogAvecImage.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Views\\Dialogs\\ProduitDialogAvecImage.cs",
+              "RelativeToolTip": "Views\\Dialogs\\ProduitDialogAvecImage.cs",
+              "ViewState": "AgIAAEABAAAAAAAAAAAawAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T11:07:34.338Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "StringNotNullOrEmptyToVisibilityConverter.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Converters\\StringNotNullOrEmptyToVisibilityConverter.cs",
+              "RelativeDocumentMoniker": "Converters\\StringNotNullOrEmptyToVisibilityConverter.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Converters\\StringNotNullOrEmptyToVisibilityConverter.cs",
+              "RelativeToolTip": "Converters\\StringNotNullOrEmptyToVisibilityConverter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T12:38:55.974Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "StockView.xaml",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Views\\StockView.xaml",
+              "RelativeDocumentMoniker": "Views\\StockView.xaml",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Views\\StockView.xaml",
+              "RelativeToolTip": "Views\\StockView.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-12-03T12:34:04.464Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "StringNotNullOrEmptyToBoolConverter.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Converters\\StringNotNullOrEmptyToBoolConverter.cs",
+              "RelativeDocumentMoniker": "Converters\\StringNotNullOrEmptyToBoolConverter.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Converters\\StringNotNullOrEmptyToBoolConverter.cs",
+              "RelativeToolTip": "Converters\\StringNotNullOrEmptyToBoolConverter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T12:40:16.572Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\App.xaml",
+              "RelativeDocumentMoniker": "App.xaml",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\App.xaml",
+              "RelativeToolTip": "App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-12-03T11:26:21.205Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ProduitRepository.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\DAL\\ProduitRepository.cs",
+              "RelativeDocumentMoniker": "DAL\\ProduitRepository.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\DAL\\ProduitRepository.cs",
+              "RelativeToolTip": "DAL\\ProduitRepository.cs",
+              "ViewState": "AgIAAI8AAAAAAAAAAEBVwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T11:21:49.963Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "StockViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\StockViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\StockViewModel.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\StockViewModel.cs",
+              "RelativeToolTip": "ViewModels\\StockViewModel.cs",
+              "ViewState": "AgIAAGYCAAAAAAAAAABRwDMCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T11:17:54.058Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "ProduitImageService.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Services\\ProduitImageService.cs",
+              "RelativeDocumentMoniker": "Services\\ProduitImageService.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\Services\\ProduitImageService.cs",
+              "RelativeToolTip": "Services\\ProduitImageService.cs",
+              "ViewState": "AgIAAPYAAAAAAAAAAIBZwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T11:12:49.904Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

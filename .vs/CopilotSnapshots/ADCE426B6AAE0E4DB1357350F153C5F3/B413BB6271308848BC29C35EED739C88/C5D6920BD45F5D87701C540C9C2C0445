@@ -1,0 +1,14 @@
+﻿namespace application_lourde.Models;
+
+public class Produit
+{
+    public int Id { get; set; }
+    public string Libelle { get; set; } = string.Empty;
+    public string Reference { get; set; } = string.Empty;
+    public decimal PrixHT { get; set; }
+    public decimal TauxTVA { get; set; }
+    public int Stock { get; set; }
+    
+    public decimal PrixTTC => PrixHT * (1 + TauxTVA / 100);
+    public bool StockFaible => Stock < 5;
+}

@@ -1,0 +1,14 @@
+﻿using System.Windows;
+
+namespace application_lourde;
+
+internal static class Program
+{
+    [STAThread]
+    static void Main()
+    {
+        var app = new App();
+        app.InitializeComponent();
+        app.Run();
+    }
+}
