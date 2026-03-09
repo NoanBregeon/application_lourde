@@ -68,6 +68,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\viewmodels\\commandeviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:viewmodels\\commandeviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|c:\\users\\fury\\source\\repos\\application_lourde\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{C7724568-B9C8-0D70-472F-6AB4C30DC91F}|application_lourde.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -77,21 +81,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "CommandeViewModel.cs",
-              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\CommandeViewModel.cs",
-              "RelativeDocumentMoniker": "ViewModels\\CommandeViewModel.cs",
-              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\CommandeViewModel.cs",
-              "RelativeToolTip": "ViewModels\\CommandeViewModel.cs",
-              "ViewState": "AgIAAFcBAAAAAAAAAEBVwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T15:19:53.558Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -107,6 +98,30 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAMAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-12-05T09:28:27.834Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "CommandeViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\CommandeViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\CommandeViewModel.cs",
+              "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\CommandeViewModel.cs",
+              "RelativeToolTip": "ViewModels\\CommandeViewModel.cs",
+              "ViewState": "AgIAAFcBAAAAAAAAAEBVwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-03T15:19:53.558Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 15,
               "Title": "MainViewModel.cs",
               "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\ViewModels\\MainViewModel.cs",
@@ -115,8 +130,7 @@
               "RelativeToolTip": "ViewModels\\MainViewModel.cs",
               "ViewState": "AgIAACkAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T15:02:12.758Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-03T15:02:12.758Z"
             },
             {
               "$type": "Document",
@@ -128,8 +142,7 @@
               "RelativeToolTip": "App.xaml.cs",
               "ViewState": "AgIAACUAAAAAAAAAAABRwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T15:00:35.745Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-03T15:00:35.745Z"
             },
             {
               "$type": "Document",
@@ -141,8 +154,7 @@
               "RelativeToolTip": "ViewModels\\RelayCommand.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T14:38:29.173Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-03T14:38:29.173Z"
             },
             {
               "$type": "Document",
@@ -154,21 +166,19 @@
               "RelativeToolTip": "ViewModels\\ViewModelBase.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T14:38:21.436Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-03T14:38:21.436Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 10,
-              "Title": "application_lourde",
+              "Title": "application_lourde.csproj",
               "DocumentMoniker": "C:\\Users\\Fury\\source\\repos\\application_lourde\\application_lourde.csproj",
               "RelativeDocumentMoniker": "application_lourde.csproj",
               "ToolTip": "C:\\Users\\Fury\\source\\repos\\application_lourde\\application_lourde.csproj",
               "RelativeToolTip": "application_lourde.csproj",
               "ViewState": "AgIAAB8AAAAAAAAAAABBwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-12-03T14:38:00.606Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-03T14:38:00.606Z"
             },
             {
               "$type": "Document",
@@ -180,8 +190,7 @@
               "RelativeToolTip": "Infrastructure\\ServiceCollectionExtensions.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T14:39:01.757Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-03T14:39:01.757Z"
             },
             {
               "$type": "Document",
@@ -275,8 +284,7 @@
               "RelativeToolTip": "ViewModels\\StockViewModel.cs",
               "ViewState": "AgIAAGYCAAAAAAAAAABRwDMCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-03T11:17:54.058Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-03T11:17:54.058Z"
             },
             {
               "$type": "Document",

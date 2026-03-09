@@ -502,3 +502,4 @@ C:\Users\Fury\source\repos\application_lourde\obj\Release\net8.0-windows\win-x64
 C:\Users\Fury\source\repos\application_lourde\obj\Release\net8.0-windows\win-x64\application_lourde.pdb
 C:\Users\Fury\source\repos\application_lourde\obj\Release\net8.0-windows\win-x64\application_lourde.genruntimeconfig.cache
 C:\Users\Fury\source\repos\application_lourde\obj\Release\net8.0-windows\win-x64\ref\application_lourde.dll
+C:\Users\Fury\source\repos\application_lourde\obj\Release\net8.0-windows\win-x64\application_lourde.sourcelink.json

@@ -1,0 +1,5 @@
+﻿{
+  "ConnectionStrings": {
+    "MariaDb": "Server=15.237.119.5;Port=3306;Database=drive_db;User=admin_drive;Password=DriveE6_2025!;"
+  }
+}
